@@ -1,0 +1,9 @@
+# Copy to android/local.properties (gitignored) or let the Flutter tool write it.
+# Paths are absolute and machine-specific.
+
+sdk.dir=/home/you/Android/Sdk
+flutter.sdk=/home/you/flutter
+
+# Optional: pin a specific NDK. `flutter.ndkVersion` is used otherwise, and the
+# CMake build of the PTY JNI library needs it.
+# ndk.dir=/home/you/Android/Sdk/ndk/27.0.12077973

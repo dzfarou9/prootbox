@@ -1,0 +1,38 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+
+# Android
+android/local.properties
+android/.gradle/
+android/.kotlin/
+android/app/.cxx/
+android/key.properties
+*.jks
+*.keystore
+.cxx/
+
+# Generated native payload (rebuild with scripts/prepare-assets.sh)
+android/app/src/main/jniLibs/**/*.so
+assets/rootfs/*.tar.gz
+assets/rootfs/*.tar.xz
+assets/rootfs/*.json
+assets/proot/proot-aarch64
+assets/proot/proot-loader-aarch64
+
+# Build scratch space for the proot/rootfs tooling
+third_party/
+scripts/.build/
+scripts/.cache/
+
+# OS noise
+.DS_Store
+Thumbs.db

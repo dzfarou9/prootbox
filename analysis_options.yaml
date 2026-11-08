@@ -1,0 +1,17 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # Missing generated plugin registrants are expected before `flutter pub get`.
+    uri_has_not_been_generated: ignore
+  exclude:
+    - build/**
+    - android/**
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    avoid_print: true
+    unawaited_futures: true
+    prefer_final_locals: false
+    sort_child_properties_last: true

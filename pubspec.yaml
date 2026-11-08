@@ -1,0 +1,31 @@
+name: prootbox
+description: >-
+  A self-contained PRoot Linux sandbox for Android. Ships its own PRoot
+  binaries and an ARM64 rootfs, runs entirely inside the app's private storage,
+  and exposes an interactive xterm terminal. No Termux, no root, no external app.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  # Color.withValues() (used by the theme) needs Dart 3.6 / Flutter 3.27.
+  # Verified with Flutter 3.47.9 / Dart 3.13.7.
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Terminal emulator (VT100/ANSI/xterm-256color) + Flutter view.
+  xterm: ^4.0.0
+  # Resolves the app's private documents directory.
+  path_provider: ^2.1.4
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Populated by scripts/build-rootfs.sh  -> assets/rootfs/rootfs.tar.gz
+    - assets/rootfs/
+    # Optional legacy fallback binaries    -> assets/proot/proot-aarch64
+    - assets/proot/

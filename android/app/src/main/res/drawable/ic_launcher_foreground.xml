@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- ">" chevron -->
+    <path
+        android:fillColor="#38E8A0"
+        android:pathData="M38,38 L44,32 L64,52 L44,72 L38,66 L52,52 Z" />
+    <!-- "_" cursor -->
+    <path
+        android:fillColor="#38E8A0"
+        android:pathData="M60,64 h20 v7 h-20 z" />
+</vector>
