@@ -6,7 +6,7 @@ package dev.prootbox.app
  * The Kotlin side owns the threading and the Flutter channel; C only does the
  * parts Java cannot express: `posix_openpt()` + `fork()`/`execve()`.
  */
-internal object PtyNative {
+public object PtyNative {
 
     init {
         System.loadLibrary("prootbox_pty")

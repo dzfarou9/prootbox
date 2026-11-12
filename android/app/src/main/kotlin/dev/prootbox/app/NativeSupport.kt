@@ -82,8 +82,8 @@ class NativeSupport(private val context: Context) : MethodChannel.MethodCallHand
             "supportedAbis" to abis,
             "sdkInt" to Build.VERSION.SDK_INT,
             "model" to listOf(Build.MANUFACTURER, Build.MODEL)
-                .filter { it.isNotBlank() }
-                .joinToString(" ")
+                .filter(String::isNotBlank)
+                .joinToString<String>(" ")
                 .trim(),
         )
     }
