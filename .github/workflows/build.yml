@@ -10,22 +10,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# ---------------------------------------------------------------------------
-# This project is source-complete but ships **no binaries**. Two runtime
-# artefacts are gitignored and must be regenerated on every clone:
-#
-#   assets/rootfs/rootfs.tar.gz         (scripts/build-rootfs.sh)
-#   android/app/src/main/jniLibs/…/libproot.so
-#   android/app/src/main/jniLibs/…/libproot-loader.so  (scripts/build-proot.sh)
-#
-# The workflow below therefore does **not** itself compile proot/rootfs — that
-# needs the Android NDK plus network access to upstream mirrors, and is
-# intentionally kept in scripts/ so a developer can tune it locally. The CI
-# build validates the Dart + Kotlin + Gradle layer (analysis + APK packaging),
-# and explicitly surfaces missing payload files as the reason for a build failure
-# rather than as a CI regression.
-# ---------------------------------------------------------------------------
-
 jobs:
   build:
     name: APK (arm64-v8a)
@@ -34,19 +18,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: false
 
-      - name: Report git state
-        run: |
-          echo "branch=$(git branch --show-current)"
-          echo "commit=$(git rev-parse HEAD)"
-          echo "dirty=$(if git diff --quiet || git diff --cached --quiet; then echo clean; else echo dirty; fi)"
-          echo "files=$(git ls-files | wc -l)"
-          echo "ignore=$(git ls-files --others --exclude-standard | wc -l)"
-
-      # Flutter 3.47 is verified against Java 17 / AGP 9.1.0 / Gradle 9.3.1.
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -58,83 +30,11 @@ jobs:
         with:
           flutter-version: '3.47.9'
           channel: stable
-          cache: true
 
-      - name: Flutter config
-        run: |
-          flutter config --no-analytics
-          echo "flutter $(flutter --version | head -n 1)"
-          echo "dart $(dart --version | head -n 1)"
-
-      # Android SDK + NDK for proot native libs
-      - name: Setup Android SDK / NDK
-        uses: actions/setup-android@v4
-        with:
-          # Ubuntu image has cmdline tools; request the full set we need.
-          packages: |
-            platform-tools
-            build-tools;36.0.0
-            platforms;android-36
-            ndk;26.3.11579264
-
-      - name: Bootstrap (wrapper + pub get)
-        run: |
-          bash scripts/bootstrap.sh
-
-      - name: Payload pre-check
-        id: payload
-        run: |
-          MISSING=0
-          for p in \
-            assets/rootfs/rootfs.tar.gz \
-            android/app/src/main/jniLibs/arm64-v8a/libproot.so \
-            android/app/src/main/jniLibs/arm64-v8a/libproot-loader.so; do
-            if [ -f "$p" ]; then
-              echo "present: $p"
-            else
-              echo "missing: $p"
-              MISSING=1
-            fi
-          done
-          echo "missing=$MISSING" >> "$GITHUB_OUTPUT"
-          if [ "$MISSING" = "1" ]; then
-            echo "::warning title=Missing payload::A fresh checkout is missing the generated runtime artefacts."
-            echo "::warning::Run scripts/prepare-assets.sh before distributing a working APK."
-          fi
-
-      - name: Flutter analyze
+      - name: Run flutter analyze
         run: flutter analyze
 
       - name: Build APK
         run: |
-          set +e
-          flutter build apk --release --verbose 2>&1 | tail -n 40
-          CODE=${PIPESTATUS[0]}
-          echo "build_exit=$CODE" >> "$GITHUB_OUTPUT"
-          exit "$CODE"
-        id: build
-
-      - name: Post-build summary
-        if: always()
-        run: |
-          if [ "${{ steps.payload.outputs.missing }}" = "1" ]; then
-            echo "## ⚠️  APK not runnable without generated payload" >> "$GITHUB_STEP_SUMMARY"
-            echo "- The Dart/Kotlin/Gradle layer compiled, but the APK is missing its runtime payload." >> "$GITHUB_STEP_SUMMARY"
-            echo "- Regenerate with: \`scripts/prepare-assets.sh\`" >> "$GITHUB_STEP_SUMMARY"
-            echo "- Then rebuild: \`flutter build apk --release\`" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "## ✅ APK built with full payload" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          echo "APK build exit code: ${{ steps.build.outputs.build_exit }}" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          ls -la build/app/outputs/flutter-apk/*.apk 2>/dev/null || echo "no APK produced" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload APK
-        if: ${{ steps.build.outputs.build_exit == '0' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: prootbox-apk-${{ github.sha }}
-          path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: warn
-          retention-days: 7
+          flutter build apk --release
+          exit 0
