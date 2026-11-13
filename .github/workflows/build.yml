@@ -66,12 +66,11 @@ jobs:
           echo "flutter $(flutter --version | head -n 1)"
           echo "dart $(dart --version | head -n 1)"
 
-      # android-actions/setup-android's ubuntu-latest image already ships the
-      # Android SDK. We still pin the NDK because proot is cross-compiled for
-      # arm64 and the NDK is what a developer uses to rebuild libproot*.so.
+      # Android SDK + NDK for proot native libs
       - name: Setup Android SDK / NDK
-        uses: android-actions/setup-android@v4
+        uses: actions/setup-android@v4
         with:
+          # Ubuntu image has cmdline tools; request the full set we need.
           packages: |
             platform-tools
             build-tools;36.0.0
@@ -104,7 +103,7 @@ jobs:
           fi
 
       - name: Flutter analyze
-        run: flutter analyze --no-pager
+        run: flutter analyze
 
       - name: Build APK
         run: |
